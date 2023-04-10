@@ -1,0 +1,4 @@
+Training=small.txt, test=small.txt : 0.87
+Training=small.txt, test=kafka.txt : 13.46
+Training=kafka.txt, test=small.txt: 10.29
+Training=kafka.txt, test=kafka.txt: 3.04

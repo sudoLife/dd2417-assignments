@@ -1,0 +1,17 @@
+S -> NP,VP
+NP -> Det,X1
+X1 -> Adj,Noun
+NP -> Adj,Noun
+NP -> Det,Noun
+NP -> faces
+NP -> suspect
+NP -> pressure
+VP -> V,NP
+Det -> the
+Noun -> faces
+Noun -> suspect
+Noun -> pressure
+Adj -> increased
+Adj -> suspect
+V -> faces
+V -> increased
