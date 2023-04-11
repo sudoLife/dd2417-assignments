@@ -40,6 +40,22 @@
         "-t",
         "${fileDirname}/data/small.txt"
       ]
+    },
+    // python NER.py -d data/ner_training.csv -t data/ner_test.csv -b
+    {
+      "name": "NER",
+      "type": "python",
+      "request": "launch",
+      "program": "${fileDirname}/NER.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": [
+        "-d",
+        "${fileDirname}/data/ner_training.csv",
+        "-t",
+        "${fileDirname}/data/ner_test.csv",
+        "-s"
+      ]
     }
   ]
 }
