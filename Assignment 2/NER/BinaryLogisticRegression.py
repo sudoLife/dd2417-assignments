@@ -203,6 +203,12 @@ class BinaryLogisticRegression(object):
             print(' '.join('{:>8.3f}'.format(
                 confusion[i][j]) for j in range(2)))
 
+        acc = (confusion[0][0] + confusion[1][1]) / self.DATAPOINTS
+        # precision = TP / (TP + FP)
+        precision = confusion[1][1] / (confusion[1][1] + confusion[1][0])
+
+        print(f'Accuracy: {acc}, Precision: {precision}')
+
     def print_result(self):
         print(' '.join(['{:.2f}'.format(x) for x in self.theta]))
         print(' '.join(['{:.2f}'.format(x) for x in self.gradient]))
