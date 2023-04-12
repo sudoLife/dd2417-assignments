@@ -3,6 +3,8 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 """
 This file is part of the computer assignments for the course DD1418/DD2418 Language engineering at KTH.
@@ -18,8 +20,8 @@ class BinaryLogisticRegression(object):
 
     #  ------------- Hyperparameters ------------------ #
 
-    LEARNING_RATE = 0.2  # The learning rate.
-    CONVERGENCE_MARGIN = 0.001  # The convergence criterion.
+    LEARNING_RATE = 0.04  # The learning rate.
+    CONVERGENCE_MARGIN = 0.01  # The convergence criterion.
     # Maximal number of passes through the datapoints in stochastic gradient descent.
     MAX_EPOCHS = 10000
     # Minibatch size (only for minibatch gradient descent)
@@ -27,6 +29,8 @@ class BinaryLogisticRegression(object):
 
     # every 10 epochs we'll check if out gradients are good on the whole dataset
     CHECK_FIT_EPOCH = 10
+
+    LAMBD = 0.0
 
     # ----------------------------------------------------------------------
 
@@ -75,7 +79,18 @@ class BinaryLogisticRegression(object):
         """
         The logistic function.
         """
-        return 1.0 / (1 + np.exp(-z))
+        return np.maximum(0.0, z)
+        # return 1.0 / (1 + np.exp(-z))
+        # if (len(z.shape) == 1):
+        #     shifted = z - np.max(z)
+        #     x_exp = np.exp(shifted)
+        #     summ = np.sum(x_exp)
+        #     return x_exp / summ
+        # shifted = z - np.max(z, axis=1)
+
+        # x_exp = np.exp(shifted)
+        # summ = np.sum(x_exp, axis=1)
+        # return x_exp / summ
 
     def conditional_prob(self, label, datapoint):
         """
@@ -152,9 +167,11 @@ class BinaryLogisticRegression(object):
                 # forward prop
                 a = self.compute_activation(batch_x)
                 # gradients
-                self.gradient = self.compute_gradients(batch_x, a, batch_y)
+                self.gradient = self.compute_gradients(
+                    batch_x, a, batch_y) + 2 * self.LAMBD * self.gradient
                 # backward prop
                 self.theta -= self.LEARNING_RATE * self.gradient
+            print(self.gradient)
 
     def fit(self):
         """

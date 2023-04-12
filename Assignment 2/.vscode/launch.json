@@ -54,7 +54,7 @@
         "${fileDirname}/data/ner_training.csv",
         "-t",
         "${fileDirname}/data/ner_test.csv",
-        "-s"
+        "-mgd"
       ]
     }
   ]
