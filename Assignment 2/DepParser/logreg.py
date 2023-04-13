@@ -132,11 +132,10 @@ class LogisticRegression(object):
                 self.gradient = self.compute_gradient(minibatch)
                 self.theta -= self.LEARNING_RATE * self.gradient
 
-            train_loss = self.loss(self.x, self.y)
             val_loss = self.loss(self.xv, self.yv)
 
-            print("Epoch: {}, Train Loss: {:.4f}, Validation Loss: {:.4f}".format(
-                epoch, train_loss, val_loss))
+            print("Epoch: {}, Validation Loss: {:.4f}".format(
+                epoch, val_loss))
 
             if val_loss < best_val_loss and best_val_loss - val_loss > self.MIN_DELTA:
                 best_val_loss = val_loss
