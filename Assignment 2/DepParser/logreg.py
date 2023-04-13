@@ -24,7 +24,7 @@ class LogisticRegression(object):
         self.MINIBATCH_SIZE = 256           # Minibatch size
         # A max number of consequent epochs with monotonously
         self.PATIENCE = 5
-        self.MIN_DELTA = 1e-6
+        self.MIN_DELTA = 1e-9
         # increasing validation loss for declaring overfitting
         # ----------------------------------------------------------------------
 
@@ -79,9 +79,18 @@ class LogisticRegression(object):
     def softmax(self, x):
         logits = np.dot(x, self.theta)
         logits_exp = np.exp(logits)
-        probs = logits_exp / np.sum(logits_exp, axis=1, keepdims=True)
+        if len(x.shape) == 1:
+            probs = logits_exp / np.sum(logits_exp)
+        else:
+            probs = logits_exp / np.sum(logits_exp, axis=1, keepdims=True)
 
         return probs
+
+    def predict(self, x):
+        """
+        Predict, just an interface for the outside users
+        """
+        return self.softmax(x)
 
     def loss(self, x, y):
         """
@@ -137,7 +146,7 @@ class LogisticRegression(object):
             print("Epoch: {}, Validation Loss: {:.4f}".format(
                 epoch, val_loss))
 
-            if val_loss < best_val_loss and best_val_loss - val_loss > self.MIN_DELTA:
+            if best_val_loss - val_loss > self.MIN_DELTA:
                 best_val_loss = val_loss
                 patience_counter = 0
             else:
