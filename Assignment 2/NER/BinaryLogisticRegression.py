@@ -79,8 +79,8 @@ class BinaryLogisticRegression(object):
         """
         The logistic function.
         """
-        return np.maximum(0.0, z)
-        # return 1.0 / (1 + np.exp(-z))
+        # return np.maximum(0.0, z)
+        return 1.0 / (1 + np.exp(-z))
         # if (len(z.shape) == 1):
         #     shifted = z - np.max(z)
         #     x_exp = np.exp(shifted)
