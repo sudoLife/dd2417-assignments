@@ -36,12 +36,13 @@ class TreeConstructor:
         parser = self.__parser
 
         i, stack, pred_tree = 0, [], [0] * len(words)
+        move_log = []
 
         while i < len(pred_tree) or len(stack) > 1:
             # get the prediction and move stuff
             datapoint = ds.dp2array(words, tags, i, stack)
             # expand the dims
-            prediction = model.predict(np.concatenate((datapoint, [1.0])))
+            prediction = model.get_log_probs(datapoint)
             moves = np.argsort(prediction)[::-1]
 
             valid_moves = parser.valid_moves(i, stack, pred_tree)
@@ -53,7 +54,8 @@ class TreeConstructor:
             # NOTE: I'm assuming at least one move is valid?
             i, stack, pred_tree = parser.move(
                 i, stack, pred_tree, selected_move)
-        return pred_tree
+            move_log.append(selected_move)
+        return move_log
 
     def evaluate(self, model, test_file, ds):
         """
@@ -70,15 +72,30 @@ class TreeConstructor:
         # test_ds = parser.create_dataset(test_file)
         correct_sentences = 0
         total_sentences = 0
+        uas_total = 0
+        uas_correct = 0
         with open(test_file, 'r') as source:
             for words, tags, tree, relations in parser.trees(source):
                 # call the build function
-                total_sentences += 1
+                correct_moves = parser.compute_correct_moves(tree)
                 moves = self.build(model, words, tags, ds)
-                correct_sentences += moves == tree
 
+                total_sentences += 1
+                # correct_sentences += moves == correct_moves
+                is_correct = True
+                for i in range(len(correct_moves)):
+                    # NOTE: will they ever be different, I wonder?
+                    if correct_moves[i] != parser.SH:
+                        uas_total += 1
+
+                        if correct_moves[i] == moves[i]:
+                            uas_correct += 1
+                    if correct_moves[i] != moves[i]:
+                        is_correct = False
+                correct_sentences += is_correct
             print(
                 f'Sentence-level accuracy: {correct_sentences / total_sentences}')
+            print(f'UAS accuracy: {uas_correct / uas_total}')
 
 
 train_set_path = "/home/sudolife/Documents/KTH/Language Engineering/Assignment 2/DepParser/en-ud-train-projective.conllu"
