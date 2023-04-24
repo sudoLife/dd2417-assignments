@@ -64,6 +64,11 @@ class RandomIndexing(object):
         self._cv = {}
         self._rv = {}
 
+        self.index = {}
+        self.word = {}
+        self.estimator = None
+        self.current_estimator_params = {}
+
     ##
     # @brief      A function cleaning the line from punctuation and digits
     ##
@@ -121,6 +126,12 @@ class RandomIndexing(object):
         for line in self.text_gen():
             for word in line:
                 self._vocab.add(word)
+
+        # TODO: get rid of self._i2w, cuz we don't need it to be a member
+        self._i2w = list(self._vocab)
+        for i, word in enumerate(self._i2w):
+            self.index[word] = i
+            self.word[i] = word
         self.write_vocabulary()
 
     ##
@@ -232,7 +243,35 @@ class RandomIndexing(object):
 
     def find_nearest(self, words, k=5, metric='cosine'):
         # YOUR CODE HERE
-        return [None]
+        estimator_params = {'metric': metric}
+        # no estimator trained or params have changed
+        if self.estimator is None or self.current_estimator_params != estimator_params:
+            # now we train the estimator
+            X = np.zeros((len(self._cv), self._dim))
+            for word, index in self.index.items():
+                X[index] = self._cv[word]
+
+            self.current_estimator_params = estimator_params
+            self.estimator = NearestNeighbors(**self.current_estimator_params, n_jobs=-1)
+            self.estimator.fit(X)
+
+        # now we actually find 'em neighbors
+        word_embeddings = np.zeros((len(words), self._dim))
+        for i, word in enumerate(words):
+            word_embeddings[i] = self._cv[word]
+        kneighbors = self.estimator.kneighbors(word_embeddings, n_neighbors=k, return_distance=True)
+
+        results = []
+        for i, word in enumerate(words):
+            result = []
+            distances, neighbors = kneighbors[0][i], kneighbors[1][i]
+
+            for distance, neighbor in zip(distances, neighbors):
+                result.append((self.word[neighbor], round(distance, 2)))
+
+            results.append(result)
+
+        return results
 
     ##
     # @brief      Returns a vector for the word obtained after Random Indexing is finished
@@ -244,7 +283,7 @@ class RandomIndexing(object):
 
     def get_word_vector(self, word):
         # YOUR CODE HERE
-        return None
+        return self._cv[word]
 
     ##
     # @brief      Checks if the vocabulary is written as a text file
@@ -269,6 +308,9 @@ class RandomIndexing(object):
                 for line in f:
                     self._vocab.add(line.strip())
         self._i2w = list(self._vocab)
+        for i, word in enumerate(self._i2w):
+            self.index[word] = i
+            self.word[i] = word
         return vocab_exists
 
     ##
