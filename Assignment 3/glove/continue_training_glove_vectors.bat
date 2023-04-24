@@ -1,0 +1,1 @@
+python Glove.py -c
