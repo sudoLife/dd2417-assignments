@@ -17,10 +17,10 @@ Created 2020 by Dmytro Kalpakchi.
 
 class Word2Vec(object):
     def __init__(self, filenames, dimension=300, window_size=2, nsample=10,
-                 learning_rate=0.025, epochs=5, use_corrected=True, use_lr_scheduling=True):
+                 learning_rate=0.025, epochs=1, use_corrected=True, use_lr_scheduling=True):
         """
         Constructs a new instance.
-        
+
         :param      filenames:      A list of filenames to be used as the training material
         :param      dimension:      The dimensionality of the word embeddings
         :param      window_size:    The size of the context window
@@ -29,46 +29,48 @@ class Word2Vec(object):
         :param      epochs:         A number of epochs
         :param      use_corrected:  An indicator of whether a corrected unigram distribution should be used
         """
-        self.__pad_word = '<pad>'
-        self.__sources = filenames
-        self.__H = dimension
-        self.__lws = window_size
-        self.__rws = window_size
-        self.__C = self.__lws + self.__rws
-        self.__init_lr = learning_rate
-        self.__lr = learning_rate
-        self.__nsample = nsample
-        self.__epochs = epochs
-        self.__nbrs = None
-        self.__use_corrected = use_corrected
-        self.__use_lr_scheduling = use_lr_scheduling
+        self._pad_word = '<pad>'
+        self._sources = filenames
+        self.emb_size = dimension
+        self.lws = window_size
+        self.rws = window_size
+        self.context_size = self.lws + self.rws
+        self.init_lr = learning_rate
+        self.lr = learning_rate
+        self.nsamples = nsample
+        self.epochs = epochs
+        self._nbrs = None
+        self._use_corrected = use_corrected
+        self._use_lr_scheduling = use_lr_scheduling
+        self.estimator = None
+        self.estimator_params = {'metric': 'cosine'}
 
-
-    def init_params(self, W, w2i, i2w):
-        self.__W = W
-        self.__w2i = w2i
-        self.__i2w = i2w
-
+    def init_params(self, W, index, word):
+        self.focus = W
+        self.index = index
+        self.word = word
 
     @property
     def vocab_size(self):
-        return self.__V
-        
+        return len(self.word)
 
     def clean_line(self, line):
         """
         The function takes a line from the text file as a string,
         removes all the punctuation and digits from it and returns
         all words in the cleaned line as a list
-        
+
         :param      line:  The line
         :type       line:  str
         """
         #
         # REPLACE WITH YOUR CODE HERE
         #
-        return []
+        translator = str.maketrans('', '', string.punctuation + string.digits)
+        clean_line = line.translate(translator)
+        words = clean_line.split()
 
+        return words
 
     def text_gen(self):
         """
@@ -83,16 +85,15 @@ class Word2Vec(object):
         - https://docs.python.org/3/howto/functional.html#generators
         - https://wiki.python.org/moin/Generators
         """
-        for fname in self.__sources:
+        for fname in self._sources:
             with open(fname, encoding='utf8', errors='ignore') as f:
                 for line in f:
                     yield self.clean_line(line)
 
-
     def get_context(self, sent, i):
         """
         Returns the context of the word `sent[i]` as a list of word indices
-        
+
         :param      sent:  The sentence
         :type       sent:  list
         :param      i:     Index of the focus word in the sentence
@@ -100,9 +101,9 @@ class Word2Vec(object):
         """
         #
         # REPLACE WITH YOUR CODE
-        # 
-        return []
-
+        #
+        context_words = sent[max(i - self.lws, 0):i] + sent[i + 1:i + 1 + self.rws]
+        return [self.index[word] for word in context_words]
 
     def skipgram_data(self):
         """
@@ -116,9 +117,49 @@ class Word2Vec(object):
         """
         #
         # REPLACE WITH YOUR CODE
-        # 
-        return [], []
+        #
+        # Okay, so I'm assuming for a sentence it's like that:
+        # we just slide the window over each sentence and create this thing
+        # vocab = set()
+        self.word = []
+        self.index = {}
+        self.unigram = []
 
+        # for line in self.text_gen():
+        #     for word in line:
+        #         vocab.add(word)
+
+        # self.word = list(vocab)
+        # for i, word in enumerate(self.word):
+        #     self.index[word] = i
+        focus_words = []
+        context_words = []
+
+        # okay let's do it the efficient way, ig?
+        for line in self.text_gen():
+            for i, word in enumerate(line):
+                if word not in self.index:
+                    self.word.append(word)
+                    self.index[word] = len(self.word) - 1
+                    self.unigram.append(1)
+                else:
+                    self.unigram[self.index[word]] += 1
+
+            # I am going through a second time because I want to use indices
+            # instead of words themselves
+            for i, word in enumerate(line):
+                focus_words.append(self.index[word])
+                # such a useless method tbh
+                context_words.append(self.get_context(line, i))
+
+        unigram_sum = sum(self.unigram)
+        self.unigram = np.asarray(self.unigram, dtype=float) / unigram_sum
+        self.unigram_corrected = self.unigram ** 0.75
+        self.unigram_corrected *= 1/np.sum(self.unigram_corrected)
+        self.ns_rng = np.random.default_rng(seed=42)
+        self.train_rng = np.random.default_rng(seed=420)
+
+        return focus_words, context_words
 
     def sigmoid(self, x):
         """
@@ -126,66 +167,113 @@ class Word2Vec(object):
         """
         return 1 / (1 + np.exp(-x))
 
+    def negative_sampling(self, number: int, xb: int, pos: int):
+        """Generate negative samples
 
-    def negative_sampling(self, number, xb, pos):
-        """
-        Sample a `number` of negatives examples with the words in `xb` and `pos` words being
-        in the taboo list, i.e. those should be replaced if sampled.
-        
-        :param      number:     The number of negative examples to be sampled
-        :type       number:     int
-        :param      xb:         The index of the current focus word
-        :type       xb:         int
-        :param      pos:        The index of the current positive example
-        :type       pos:        int
+        Args:
+            number (int): number of negative samples to be generated
+            xb (int): index of the current focus word
+            pos (int): index of the current positive example
+
+        Returns:
+            list[int]: negative sampled words
         """
         #
         # REPLACE WITH YOUR CODE
         #
-        return []
+        samples = np.zeros((number, self.emb_size))
 
+        i = 0
+        while i < number:
+            index = self.index[self.ns_rng.choice(self.word, p=self.unigram_corrected)]
+
+            if index in (xb, pos):
+                continue
+
+            samples[i] = index
+            i += 1
+
+        return samples
+
+    def calculate_learning_rate(self, processed_words: int):
+        if not self._use_lr_scheduling:
+            return
+
+        if self.lr < self.init_lr * 1e-4:
+            self.lr = self.init_lr * 1e-4
+        else:
+            self.lr = self.init_lr * (1 - processed_words / (self.epochs * self.vocab_size + 1))
 
     def train(self):
         """
         Performs the training of the word2vec skip-gram model
         """
-        x, t = self.skipgram_data()
-        N = len(x)
+        focus_words, context_words = self.skipgram_data()
+        N = len(focus_words)
         print("Dataset contains {} datapoints".format(N))
 
         # REPLACE WITH YOUR RANDOM INITIALIZATION
-        self.__W = np.zeros((100, 50))
-        self.__U = np.zeros((100, 50))
+        self.focus = self.train_rng.normal(loc=0.0, scale=0.01, size=(N, self.emb_size))
+        self.context = self.train_rng.normal(loc=0.0, scale=0.01, size=(N, self.emb_size))
 
-        for ep in range(self.__epochs):
+        for ep in range(self.epochs):
+            # TODO: should I shuffle?
             for i in tqdm(range(N)):
                 #
-                # YOUR CODE HERE 
+                # YOUR CODE HERE
                 #
-                pass
+                word = focus_words[i]
+                positive_examples = context_words[i]
+                # positive examples
+                focus_grad = 0.0
+                # loss = 0.0
+                for context_word in positive_examples:
+                    # compute forward prop
+                    # for that we need the context vector of context_word
+                    # and the focus vector of the word
+                    # let's go
+                    activation = self.sigmoid(self.context[context_word].dot(self.focus[word]))
+                    pos_context_grad = self.focus[word] * (activation - 1)
+                    focus_grad += self.context[context_word] * (activation - 1)
 
+                    # loss += np.log(1 + np.exp(-self.context[context_word].dot(self.focus[word])))
+                    # backward prop
+                    # TODO: lr schedule
+                    self.context[context_word] -= self.lr * pos_context_grad
 
-    def find_nearest(self, words, metric):
+                    # forward prop for negative
+                    negative_samples = self.negative_sampling(self.nsamples, word, context_word)
+                    for nsample in negative_samples:
+                        activation = self.sigmoid(self.context[nsample].dot(self.focus[word]))
+                        neg_context_grad = self.focus[word] * activation
+                        focus_grad += self.context[nsample] * activation
+                        self.context[nsample] -= self.lr * neg_context_grad
+                        # loss += np.log(1 + np.exp(self.context[nsample].dot(self.focus[word])))
+                # print(f'Loss: {loss}')
+                # update the focus vector
+                self.focus[word] -= self.lr * focus_grad
+
+    def find_nearest(self, words, k=5, metric='cosine'):
         """
         Function returning k nearest neighbors with distances for each word in `words`
-        
+
         We suggest using nearest neighbors implementation from scikit-learn 
         (https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestNeighbors.html). Check
         carefully their documentation regarding the parameters passed to the algorithm.
-    
+
         To describe how the function operates, imagine you want to find 5 nearest neighbors for the words
         "Harry" and "Potter" using some distance metric `m`. 
         For that you would need to call `self.find_nearest(["Harry", "Potter"], k=5, metric='m')`.
         The output of the function would then be the following list of lists of tuples (LLT)
         (all words and distances are just example values):
-    
+
         [[('Harry', 0.0), ('Hagrid', 0.07), ('Snape', 0.08), ('Dumbledore', 0.08), ('Hermione', 0.09)],
          [('Potter', 0.0), ('quickly', 0.21), ('asked', 0.22), ('lied', 0.23), ('okay', 0.24)]]
-        
+
         The i-th element of the LLT would correspond to k nearest neighbors for the i-th word in the `words`
         list, provided as an argument. Each tuple contains a word and a similarity/distance metric.
         The tuples are sorted either by descending similarity or by ascending distance.
-        
+
         :param      words:   Words for the nearest neighbors to be found
         :type       words:   list
         :param      metric:  The similarity/distance metric
@@ -194,8 +282,29 @@ class Word2Vec(object):
         #
         # REPLACE WITH YOUR CODE
         #
-        return []
+        estimator_params = {'metric': metric}
+        if self.estimator is None or self.current_estimator_params != estimator_params:
+            # retrain
+            self.estimator_params = estimator_params
 
+            self.estimator = NearestNeighbors(**self.estimator_params, n_jobs=-1)
+            self.estimator.fit(self.focus)
+
+        words = [self.index[word] for word in words]
+        word_embeddings = self.focus[words]
+        kneighbors = self.estimator.kneighbors(word_embeddings, n_neighbors=k, return_distance=True)
+
+        results = []
+        for i in range(len(words)):
+            result = []
+            distances, neighbors = kneighbors[0][i], kneighbors[1][i]
+
+            for distance, neighbor in zip(distances, neighbors):
+                result.append((self.word[neighbor], round(distance, 2)))
+
+            results.append(result)
+
+        return results
 
     def write_to_file(self):
         """
@@ -203,13 +312,12 @@ class Word2Vec(object):
         """
         try:
             with open("w2v.txt", 'w') as f:
-                W = self.__W
-                f.write("{} {}\n".format(self.__V, self.__H))
-                for i, w in enumerate(self.__i2w):
-                    f.write(w + " " + " ".join(map(lambda x: "{0:.6f}".format(x), W[i,:])) + "\n")
-        except:
+                W = self.focus
+                f.write("{} {}\n".format(self.vocab_size, self.emb_size))
+                for i, w in enumerate(self.word):
+                    f.write(w + " " + " ".join(map(lambda x: "{0:.6f}".format(x), W[i, :])) + "\n")
+        except Exception as e:
             print("Error: failing to write model to the file")
-
 
     @classmethod
     def load(cls, fname):
@@ -235,7 +343,6 @@ class Word2Vec(object):
             print("Error: failing to load the model to the file")
         return w2v
 
-
     def interact(self):
         """
         Interactive mode allowing a user to enter a number of space-separated words and
@@ -245,12 +352,11 @@ class Word2Vec(object):
         text = input('> ')
         while text != 'q':
             text = text.split()
-            neighbors = self.find_nearest(text, 'cosine')
+            neighbors = self.find_nearest(text)
 
             for w, n in zip(text, neighbors):
                 print("Neighbors for {}: {}".format(w, n))
             text = input('> ')
-
 
     def train_and_persist(self):
         """
@@ -260,17 +366,20 @@ class Word2Vec(object):
         self.train()
         self.write_to_file()
         self.interact()
-        
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='word2vec embeddings toolkit')
-    parser.add_argument('-t', '--text', default='harry_potter_1.txt',
-                        help='Comma-separated source text files to be trained on')
+    parser.add_argument(
+        '-t', '--text',
+        default='/home/sudolife/Documents/KTH/Language Engineering/Assignment 3/word2vec/harry_potter_1.txt',
+        help='Comma-separated source text files to be trained on')
     parser.add_argument('-s', '--save', default='w2v.txt', help='Filename where word vectors are saved')
     parser.add_argument('-d', '--dimension', default=50, help='Dimensionality of word vectors')
     parser.add_argument('-ws', '--window-size', default=2, help='Context window size')
     parser.add_argument('-neg', '--negative_sample', default=10, help='Number of negative samples')
-    parser.add_argument('-lr', '--learning-rate', default=0.025, help='Initial learning rate')
+    # parser.add_argument('-lr', '--learning-rate', default=0.025, help='Initial learning rate')
+    parser.add_argument('-lr', '--learning-rate', default=0.1, help='Initial learning rate')
     parser.add_argument('-e', '--epochs', default=5, help='Number of epochs')
     parser.add_argument('-uc', '--use-corrected', action='store_true', default=True,
                         help="""An indicator of whether to use a corrected unigram distribution
