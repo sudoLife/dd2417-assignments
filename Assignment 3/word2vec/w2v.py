@@ -17,7 +17,7 @@ Created 2020 by Dmytro Kalpakchi.
 
 class Word2Vec(object):
     def __init__(self, filenames, dimension=300, window_size=2, nsample=10,
-                 learning_rate=0.025, epochs=1, use_corrected=True, use_lr_scheduling=True):
+                 learning_rate=0.025, epochs=5, use_corrected=True, use_lr_scheduling=True):
         """
         Constructs a new instance.
 
@@ -195,6 +195,22 @@ class Word2Vec(object):
 
         return samples
 
+    def negative_sampling_batch(self, number: int, focus_word: int, context: list) -> list[int]:
+        samples = np.zeros((len(context) * number), dtype=int)
+
+        i = 0
+        while i < number:
+            # TODO: honor use_corrected option
+            index = self.index[self.ns_rng.choice(self.word, p=self.unigram_corrected)]
+
+            if index == focus_word or index in context:
+                continue
+
+            samples[i] = index
+            i += 1
+
+        return samples
+
     def calculate_learning_rate(self, processed_words: int):
         if not self._use_lr_scheduling:
             return
@@ -224,33 +240,27 @@ class Word2Vec(object):
                 #
                 word = focus_words[i]
                 positive_examples = context_words[i]
+                if len(positive_examples) == 0:
+                    continue
+                negative_examples = self.negative_sampling_batch(self.nsamples, word, positive_examples)
                 # positive examples
-                focus_grad = 0.0
+                focus_grad = np.zeros(self.emb_size)
                 # loss = 0.0
-                for context_word in positive_examples:
-                    # compute forward prop
-                    # for that we need the context vector of context_word
-                    # and the focus vector of the word
-                    # let's go
-                    activation = self.sigmoid(self.context[context_word].dot(self.focus[word]))
-                    pos_context_grad = self.focus[word] * (activation - 1)
-                    focus_grad += self.context[context_word] * (activation - 1)
+                pos_contexts = self.context[positive_examples]
+                neg_contexts = self.context[negative_examples]
 
-                    # loss += np.log(1 + np.exp(-self.context[context_word].dot(self.focus[word])))
-                    # backward prop
-                    # TODO: lr schedule
-                    self.context[context_word] -= self.lr * pos_context_grad
+                pos_activations = self.sigmoid(pos_contexts @ self.focus[word]).reshape(-1, 1) - 1
+                pos_context_grad = pos_activations * self.focus[word]
+                # FIXME: this pos_contexts is old, but maybe that's okay?
+                focus_grad += np.mean(pos_activations * pos_contexts, axis=0)
+                self.context[positive_examples] -= self.lr * pos_context_grad
 
-                    # forward prop for negative
-                    negative_samples = self.negative_sampling(self.nsamples, word, context_word)
-                    for nsample in negative_samples:
-                        activation = self.sigmoid(self.context[nsample].dot(self.focus[word]))
-                        neg_context_grad = self.focus[word] * activation
-                        focus_grad += self.context[nsample] * activation
-                        self.context[nsample] -= self.lr * neg_context_grad
-                        # loss += np.log(1 + np.exp(self.context[nsample].dot(self.focus[word])))
-                # print(f'Loss: {loss}')
-                # update the focus vector
+                neg_activations = self.sigmoid(neg_contexts @ self.focus[word]).reshape(-1, 1)
+                neg_context_grad = neg_activations * self.focus[word]
+
+                focus_grad += np.mean(neg_activations * neg_contexts, axis=0)
+                self.context[negative_examples] -= self.lr * neg_context_grad
+
                 self.focus[word] -= self.lr * focus_grad
 
     def find_nearest(self, words, k=5, metric='cosine'):
@@ -379,8 +389,8 @@ if __name__ == '__main__':
     parser.add_argument('-ws', '--window-size', default=2, help='Context window size')
     parser.add_argument('-neg', '--negative_sample', default=10, help='Number of negative samples')
     # parser.add_argument('-lr', '--learning-rate', default=0.025, help='Initial learning rate')
-    parser.add_argument('-lr', '--learning-rate', default=0.1, help='Initial learning rate')
-    parser.add_argument('-e', '--epochs', default=5, help='Number of epochs')
+    parser.add_argument('-lr', '--learning-rate', default=0.025, help='Initial learning rate')
+    parser.add_argument('-e', '--epochs', type=int, default=5, help='Number of epochs')
     parser.add_argument('-uc', '--use-corrected', action='store_true', default=True,
                         help="""An indicator of whether to use a corrected unigram distribution
                                 for negative sampling""")
