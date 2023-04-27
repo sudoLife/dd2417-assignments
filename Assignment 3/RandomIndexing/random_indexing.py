@@ -248,8 +248,11 @@ class RandomIndexing(object):
         if self.estimator is None or self.current_estimator_params != estimator_params:
             # now we train the estimator
             X = np.zeros((len(self._cv), self._dim))
-            for word, index in self.index.items():
-                X[index] = self._cv[word]
+            with open("embeddings.txt", 'w') as dump_file:
+                dump_file.write(f'{X.shape[0]} {X.shape[1]}\n')
+                for word, index in self.index.items():
+                    X[index] = self._cv[word]
+                    dump_file.write(word + " " + " ".join(map(lambda x: "{0:.6f}".format(x), self._cv[word])) + "\n")
 
             self.current_estimator_params = estimator_params
             self.estimator = NearestNeighbors(**self.current_estimator_params, n_jobs=-1)
@@ -282,8 +285,9 @@ class RandomIndexing(object):
     ##
 
     def get_word_vector(self, word):
-        # YOUR CODE HERE
-        return self._cv[word]
+        if word in self.index:
+            return self._cv[self.index[word]]
+        return None
 
     ##
     # @brief      Checks if the vocabulary is written as a text file
