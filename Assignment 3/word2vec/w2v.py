@@ -5,6 +5,8 @@ import string
 from collections import defaultdict
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
+from gensim.models import Word2Vec as gWord2Vec
+from multiprocessing import cpu_count
 
 from tqdm import tqdm
 
@@ -17,7 +19,7 @@ Created 2020 by Dmytro Kalpakchi.
 
 class Word2Vec(object):
     def __init__(self, filenames, dimension=300, window_size=2, nsample=10,
-                 learning_rate=0.025, epochs=5, use_corrected=True, use_lr_scheduling=True):
+                 learning_rate=0.025, epochs=5, use_corrected=True, use_lr_scheduling=True, gensim=False):
         """
         Constructs a new instance.
 
@@ -37,6 +39,7 @@ class Word2Vec(object):
         self.context_size = self.lws + self.rws
         self.init_lr = learning_rate
         self.lr = learning_rate
+        self.gensim = gensim
         self.nsamples = nsample
         self.epochs = epochs
         self._nbrs = None
@@ -167,47 +170,20 @@ class Word2Vec(object):
         """
         return 1 / (1 + np.exp(-x))
 
-    def negative_sampling(self, number: int, xb: int, pos: int):
-        """Generate negative samples
-
-        Args:
-            number (int): number of negative samples to be generated
-            xb (int): index of the current focus word
-            pos (int): index of the current positive example
-
-        Returns:
-            list[int]: negative sampled words
-        """
-        #
-        # REPLACE WITH YOUR CODE
-        #
-        samples = np.zeros((number, self.emb_size))
-
-        i = 0
-        while i < number:
-            index = self.index[self.ns_rng.choice(self.word, p=self.unigram_corrected)]
-
-            if index in (xb, pos):
-                continue
-
-            samples[i] = index
-            i += 1
-
-        return samples
-
     def negative_sampling_batch(self, number: int, focus_word: int, context: list) -> list[int]:
         samples = np.zeros((len(context) * number), dtype=int)
 
-        i = 0
-        while i < number:
-            # TODO: honor use_corrected option
-            index = self.index[self.ns_rng.choice(self.word, p=self.unigram_corrected)]
+        probs = self.unigram_corrected if self._use_corrected else self.unigram
+        for i, cw in enumerate(context):
+            j = 0
+            while j < number:
+                index = self.index[self.ns_rng.choice(self.word, p=probs)]
 
-            if index == focus_word or index in context:
-                continue
+                if index in (focus_word, cw):
+                    continue
 
-            samples[i] = index
-            i += 1
+                samples[i * number + j] = index
+                j += 1
 
         return samples
 
@@ -219,6 +195,28 @@ class Word2Vec(object):
             self.lr = self.init_lr * 1e-4
         else:
             self.lr = self.init_lr * (1 - processed_words / (self.epochs * self.vocab_size + 1))
+
+    def train_gensim(self):
+        _ = self.skipgram_data()
+
+        # sentences = [x for x in self.text_gen()]
+
+        # TODO: maybe see if we can just supply the files to gensim
+        ns_exponent = 0.75 if self._use_corrected else 1.0
+        model = gWord2Vec(
+            corpus_file=self._sources[0],
+            vector_size=self.emb_size, window=self.lws, sg=1, negative=self.nsamples, ns_exponent=ns_exponent,
+            alpha=self.lr, epochs=self.epochs, workers=cpu_count() - 1)
+
+        print("Done training!")
+        self.focus = np.zeros((self.vocab_size, self.emb_size))
+
+        for word in self.word:
+            if word in model.wv:
+                self.focus[self.index[word]] = model.wv[word]
+            else:
+                self.focus[self.index[word]] = self.train_rng.normal(loc=0.0, scale=0.01, size=(self.emb_size, ))
+        print("Done embedding")
 
     def train(self):
         """
@@ -234,10 +232,13 @@ class Word2Vec(object):
 
         for ep in range(self.epochs):
             # TODO: should I shuffle?
+            permutation = self.train_rng.permutation(N)
+            processed_words = 0
             for i in tqdm(range(N)):
                 #
                 # YOUR CODE HERE
                 #
+                i = permutation[i]
                 word = focus_words[i]
                 positive_examples = context_words[i]
                 if len(positive_examples) == 0:
@@ -262,17 +263,20 @@ class Word2Vec(object):
                 self.context[negative_examples] -= self.lr * neg_context_grad
 
                 self.focus[word] -= self.lr * focus_grad
+                processed_words += 1
+                self.calculate_learning_rate(processed_words)
+            self.write_to_file(f"w2v_{ep}epoch.txt")
 
     def find_nearest(self, words, k=5, metric='cosine'):
         """
         Function returning k nearest neighbors with distances for each word in `words`
 
-        We suggest using nearest neighbors implementation from scikit-learn 
+        We suggest using nearest neighbors implementation from scikit-learn
         (https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestNeighbors.html). Check
         carefully their documentation regarding the parameters passed to the algorithm.
 
         To describe how the function operates, imagine you want to find 5 nearest neighbors for the words
-        "Harry" and "Potter" using some distance metric `m`. 
+        "Harry" and "Potter" using some distance metric `m`.
         For that you would need to call `self.find_nearest(["Harry", "Potter"], k=5, metric='m')`.
         The output of the function would then be the following list of lists of tuples (LLT)
         (all words and distances are just example values):
@@ -293,7 +297,7 @@ class Word2Vec(object):
         # REPLACE WITH YOUR CODE
         #
         estimator_params = {'metric': metric}
-        if self.estimator is None or self.current_estimator_params != estimator_params:
+        if self.estimator is None or self.estimator_params != estimator_params:
             # retrain
             self.estimator_params = estimator_params
 
@@ -316,7 +320,7 @@ class Word2Vec(object):
 
         return results
 
-    def write_to_file(self):
+    def write_to_file(self, filename="w2v.txt"):
         """
         Write the model to a file `w2v.txt`
         """
@@ -329,7 +333,7 @@ class Word2Vec(object):
         except Exception as e:
             print("Error: failing to write model to the file")
 
-    @classmethod
+    @ classmethod
     def load(cls, fname):
         """
         Load the word2vec model from a file `fname`
@@ -373,7 +377,10 @@ class Word2Vec(object):
         Main function call to train word embeddings and being able to input
         example words interactively
         """
-        self.train()
+        if self.gensim:
+            self.train_gensim()
+        else:
+            self.train()
         self.write_to_file()
         self.interact()
 
@@ -385,17 +392,18 @@ if __name__ == '__main__':
         default='/home/sudolife/Documents/KTH/Language Engineering/Assignment 3/word2vec/harry_potter_1.txt',
         help='Comma-separated source text files to be trained on')
     parser.add_argument('-s', '--save', default='w2v.txt', help='Filename where word vectors are saved')
-    parser.add_argument('-d', '--dimension', default=50, help='Dimensionality of word vectors')
-    parser.add_argument('-ws', '--window-size', default=2, help='Context window size')
-    parser.add_argument('-neg', '--negative_sample', default=10, help='Number of negative samples')
-    # parser.add_argument('-lr', '--learning-rate', default=0.025, help='Initial learning rate')
-    parser.add_argument('-lr', '--learning-rate', default=0.025, help='Initial learning rate')
+    parser.add_argument('-d', '--dimension', type=int, default=50, help='Dimensionality of word vectors')
+    parser.add_argument('-ws', '--window-size', type=int, default=2, help='Context window size')
+    parser.add_argument('-neg', '--negative_sample', type=int, default=10, help='Number of negative samples')
+    parser.add_argument('-lr', '--learning-rate', type=float, default=0.025, help='Initial learning rate')
     parser.add_argument('-e', '--epochs', type=int, default=5, help='Number of epochs')
-    parser.add_argument('-uc', '--use-corrected', action='store_true', default=True,
+    parser.add_argument('-uc', '--use-corrected', action='store_true', default=False,
                         help="""An indicator of whether to use a corrected unigram distribution
                                 for negative sampling""")
-    parser.add_argument('-ulrs', '--use-learning-rate-scheduling', action='store_true', default=True,
+    parser.add_argument('-ulrs', '--use-learning-rate-scheduling', action='store_true', default=False,
                         help="An indicator of whether using the learning rate scheduling")
+    parser.add_argument('-gs', '--gensim', action='store_true', default=False,
+                        help="Use gensim's implementation")
     args = parser.parse_args()
 
     if os.path.exists(args.save):
@@ -406,6 +414,6 @@ if __name__ == '__main__':
         w2v = Word2Vec(
             args.text.split(','), dimension=args.dimension, window_size=args.window_size,
             nsample=args.negative_sample, learning_rate=args.learning_rate, epochs=args.epochs,
-            use_corrected=args.use_corrected, use_lr_scheduling=args.use_learning_rate_scheduling
+            use_corrected=args.use_corrected, use_lr_scheduling=args.use_learning_rate_scheduling, gensim=args.gensim
         )
         w2v.train_and_persist()
