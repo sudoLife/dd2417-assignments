@@ -1,0 +1,370 @@
+does tom sing?	sjunger tom?
+ziri asked rima for help.	ziri bad rima om hjälp.
+hi, everybody!	hej, allesammans!
+get on the floor.	gå ner på golvet.
+you're a snob.	du är en snobb.
+that noise is driving me nuts.	det där ljudet gör mig galen.
+it's on your desk.	den sitter på ert skrivbord.
+ziri was fired.	ziri fick sparken.
+she speaks english as if she were a native speaker.	hon talar engelska som om det vore hennes modersmål.
+look at the sky.	titta på himlen.
+it cannot be true.	det kan inte vara sant.
+i helped tom once.	jag hjälpte tom en gång.
+emily wants to learn greek.	emily vill lära sig grekiska.
+tom was unbeatable.	tom var oslagbar.
+do you know the rules?	känner du reglarna?
+i care about this.	jag bryr mig om det här.
+did you shoot tom?	sköt du tom?
+he likes neither baseball nor football.	han tycker varken om baseball eller fotboll.
+the train has been delayed.	tåget är försenat.
+we've only got an hour.	vi har bara en timme.
+tom is my daughter's boyfriend.	tom är min dotters pojkvän.
+you seemed happy here.	du verkade glad här.
+i don’t know what to do without you.	jag vet inte vad jag skulle göra utan dig.
+that's very kind of you to say that.	det är väldigt snällt av er att säga det.
+can i take tom home?	kan jag ta med mig tom hem?
+generally speaking, women live longer than men.	generellt sett lever kvinnor längre än män.
+i'm the killer.	jag är mördaren.
+it's too narrow.	det är för smalt.
+do you really not like them?	gillar du dem verkligen inte?
+there is a cat in the kitchen.	det finns en katt i köket.
+this extension cord is too short.	den här förlängningskabeln är för kort.
+who wants this one?	vem vill ha den här?
+go get changed.	gå och byt om.
+the rent is very high.	hyran är mycket hög.
+tom was successful.	tom var framgångsrik.
+do you like our wedding cake?	tycker ni om vår bröllopstårta?
+go wash up.	gå och tvätta dig!
+tom was fired last week.	tom fick sparken förra veckan.
+i have a boss who's much younger than me.	jag har en chef som är mycket yngre än mig.
+where can i buy one?	var kan jag köpa en?
+this was free.	den här var gratis.
+i'll go ask tom.	jag ska gå och fråga tom.
+i want to be more independent.	jag vill vara mera självständig.
+the girl is happily reading.	flickan läser glatt.
+can you repair this?	kan ni reparera den här?
+watching tv is fun.	det är roligt att titta på tv.
+it's going to snow today.	det ska snöa idag.
+you are in my way.	du står i vägen för mig.
+i couldn't say no.	jag kunde inte säga nej.
+i built it myself.	jag har byggt den själv.
+i'm looking for work.	jag söker arbete.
+he reacted.	han reagerade.
+mary is blind in one eye.	mary är blind på ena ögat.
+this is a catastrophe.	det här är en katastrof.
+do you like pears?	tycker du om päron?
+tom said that his father told him to do that.	tom sa att sin far sa till honom att göra det.
+italy isn't greece.	italien är inte grekland.
+what is the difference between a pigeon?	vad är skillnaden mellan en duva?
+tom is charismatic.	tom är karismatisk.
+stop being naughty.	sluta vara stygg.
+liisa tried to look nice and harmless.	liisa försökte se snäll och menlös ut.
+we tried to contact the other ship.	vi försökte att kontakta det andra skeppet.
+tom and mary didn't wait for john.	tom och mary väntade inte på john.
+hand me the pliers.	ge mig tången.
+i want to go to another country.	jag vill åka till ett annat land.
+how did you know?	hur visste du?
+these objects are very useful.	de här föremålen är väldigt användbara.
+that's none of our business.	det angår inte oss.
+bats have wings too.	fladdermöss har också vingar.
+i've heard of tom.	jag har hört talas om tom.
+i don't hear a thing.	jag hör inte ett skvatt.
+tom wasn't home alone.	tom var inte ensam hemma.
+your success depends on your efforts.	dina framgångar beror på dina ansträngningar.
+i have won the game.	jag har vunnit spelet.
+i've milked the cows.	jag har mjölkat korna.
+aren't i right?	har jag inte rätt?
+she didn't say a word.	hon sa inte ett ord.
+she lives in rome.	hon bor i rom.
+the patient's injuries aren't life-threatening.	patientens skador är inte livshotande.
+i'm not paid much.	jag är inte välbetald.
+i'm fine, thank you.	jag mår bra, tack.
+he is telling a lie.	han ljuger.
+he has bad alcohol habits.	han har dåliga alkoholvanor.
+this is all a terrible mistake.	allt detta är ett fruktansvärt misstag.
+there is an apple on the table.	det finns ett äpple på bordet.
+are you frightened yet?	är ni rädda än?
+i am very rich.	jag är väldigt rik.
+i was working late.	jag jobbade sent.
+keep the ball rolling.	håll bollen i rullning.
+who cares whether tom eats egg yolks or not?	vem bryr sig om tom äter äggulor eller inte.
+we can talk about it.	vi kan prata om det.
+what's your problem?	vad är ditt problem?
+they have twelve children.	de har tolv barn.
+how's your married life?	hur är ert liv som gifta?
+they took their jackets off.	de tog av sig jackorna.
+who is reading?	vem läser?
+fruit is rich in vitamins.	frukt är rikt på vitaminer.
+i am suicidal.	jag är självmordsbenägen.
+my wish is to be a singer.	min önskan är att bli sångare.
+she's smoking.	hon röker.
+i'm trying to translate.	jag försöker översätta.
+what can you give me?	vad kan du ge mig?
+tom told a joke.	tom berättade en vits.
+the book fell to the floor.	boken föll på golvet.
+our company's base is in tokyo.	vårt företags högkvarter är i tokyo.
+is tom next?	är tom näst i tur?
+everyone has the right to the protection of the moral and material interests resulting from any scientific, literary or artistic production of which he is the author.	envar har rätt till skydd för de moraliska och materiella intressen, som härröra från varje vetenskapligt, litterärt eller konstnärligt verk, till vilket han är upphovsman.
+i see someone between the trees.	jag ser någon mellan träden.
+the bus was full.	bussen var full.
+why are there so many flies here?	varför är det så mycket flugor här?
+seen from the plane, the island looks very beautiful.	sedd från flygplanet ser ön väldigt vacker ut.
+"could i use your dictionary?" "of course."	”får jag låna din ordbok?” ”naturligtvis.”
+children generally have a higher body temperature than adults.	barn har generellt en högre kroppstemperatur än vuxna.
+take your time.	ta tid på dig.
+he poured water over himself.	han hällde vatten över sig själv.
+i remember the past.	jag mindes det förflutna.
+i don't speak hebrew.	jag talar inte hebreiska.
+it wasn't on sale.	den var inte på rea.
+i've always been interested by politics.	jag har alltid varit intresserad av politik.
+again?	igen?
+i live in boston with my family.	jag bor i boston med min familj.
+tom asked me who was responsible for the accident.	tom frågade mig vem som var ansvarig för olyckan.
+tom took his dog for a long walk this afternoon.	tom tog en lång promenad med sin hund i eftermiddags.
+what could be wrong?	vad kunde vara fel?
+what did tom expect?	vad förväntade sig tom?
+it's revolting.	det är motbjudande.
+i like freedom.	jag gillar frihet.
+i don't want people to hate me.	jag vill inte att folk ska hata mig.
+you must help her.	du måste hjälpa henne.
+has tom told mary?	har tom sagt det till mary?
+he said that he's very hungry.	han sa att han är väldigt hungrig.
+the young man lives in new york.	den unge mannen bor i new york.
+melanie knows the truth.	melanie vet sanningen.
+the opposite is also true.	motsatsen är också sann.
+are you good at tennis?	är du bra på tennis?
+tom hasn't done a good job.	tom har inte gjort ett så bra jobb.
+a widow is a woman whose husband has died.	en änka är en kvinna vars make har avlidit.
+my english is not good at all.	min engelska är inte alls bra.
+tom can't speak french. mary can't speak french either.	tom kan inte tala franska. mary kan inte heller tala franska.
+isn't that the plan?	är inte det planen?
+may i look at the menu?	kan jag få se på matsedeln?
+she eats fruit.	hon äter frukt.
+they tried to fire him, but he did not get the hint.	de försökte avskeda honom, men han uppfattade inte vinken.
+it's clear.	det är uppfattat.
+he is australian.	han är australiensisk.
+tom said he read a book about this ship.	tom sa att han läste en bok om det här skeppet.
+my brother is a teacher.	min bror är lärare.
+what have i missed?	vad har jag missat?
+can you still drive?	kan du köra ännu?
+i can't live without chocolate.	jag kan inte leva utan choklad.
+tom revealed the secret to mary.	tom avslöjade hemligheten för mary.
+did you bring rolls?	tog du med frallor?
+they entered the elevator.	de steg in i hissen.
+tom accidentally deleted all the files on one of his external hard disks.	tom raderade av misstag alla filer på en av sina externa hårddiskar.
+you can come in here.	du kan komma in här.
+she didn't even know our names.	hon visste inte ens vad vi hette.
+he eats a hamburger in his car on the way home.	han äter en hamburgare i bilen på vägen hem.
+tom reacted appropriately.	tom reagerade på lämpligt sätt.
+i can't stand liars.	jag klarar inte av lögnare.
+it's only taken three years.	det har bara tagit tre år.
+i'm already here.	jag är redan här.
+he always says that.	han säger alltid sådär.
+i would like to ask a question.	jag skulle vilja ställa en fråga.
+what trash!	vilket skräp!
+when was the last time you commented a sentence?	när kommenterade du en mening senast?
+you weren't very nice.	du var inte särskilt trevlig.
+they crashed.	de störtade.
+do you see the portrait?	ser du porträttet?
+you don't have to do that now.	du måste inte göra det nu.
+tom forgot to feed his dog.	tom glömde att mata sin hund.
+airplanes land at airports.	flygplan landar på flygplatser.
+drive!	kör!
+tom has a large family.	tom har en stor familj.
+who's helping him?	vem hjälper honom?
+they aren't as thin as they used to be.	de är inte lika tunna som de brukade vara.
+give me the file.	ge mig filen.
+he reached for his guitar.	han sträckte sig efter sin gitarr.
+where is the spanish embassy?	var ligger den spanska ambassaden?
+we were really tight.	vi var mycket tajta.
+did you sleep here?	sov du här?
+this is not a fish.	det här är inte en fisk.
+no one would hurt tom.	ingen skulle skada tom.
+markku seemed pleasantly surprised.	markku verkade glatt överraskad.
+i think that tom has fallen asleep.	jag tror att tom har somnat.
+why are you looking at me?	vad tittar du på mig för?
+tom is ambitious.	tom är ambitiös.
+i'm willing to share.	jag är villig att dela.
+i know what it's called.	jag vet vad det kallas.
+i don't feel sorry for them.	jag känner mig inte ledsen för dem.
+tom is no longer a kid.	tom är inget barn längre.
+i don't know if you can see this.	jag vet inte om ni kan se detta.
+there was no place to buy food.	det fanns ingenstans att köpa mat.
+do you feel hungry?	känner du dig hungrig?
+i'm studying art history.	jag studerar konsthistoria.
+can you help tom?	kan du hjälpa tom?
+you're unpredictable.	du är oförutsägbar.
+tom still has my umbrella.	tom har fortfarande mitt paraply.
+tom likes listening to the radio.	tom gillar att lyssna på radio.
+she is responsible.	hon är ansvarig.
+be patient.	var tålmodig.
+giraffes only eat plants.	giraffer äter bara växter.
+find out what's happening.	ta reda på vad det är som pågår.
+tom got very mad.	tom blev mycket arg.
+how do you think i feel?	hur tror ni att jag känner?
+help us, tom.	hjälp oss, tom.
+tom forgives you.	tom förlåter dig.
+he devoted all his time to the study of history.	han ägnade all sin tid till att studera historia.
+this is harder than i expected.	det här är svårare än jag förväntade mig.
+he always insists on having everything his own way.	han håller alltid fast vid att ha allting på sitt sätt.
+i have friends there.	jag har vänner där.
+when was this temple built?	när byggdes det här templet?
+she needs to help him.	hon måste hjälpa honom.
+tom didn't tell me he was engaged.	tom berättade inte för mig att han var förlovad.
+he did not buy it after all.	han köpte den inte i alla fall.
+i should probably apologize to tom.	jag borde nog be tom om ursäkt.
+he was put in prison.	han sattes i fängelse.
+tom looked at the clock.	tom kollade på klockan.
+we made a sand castle.	vi byggde ett sandslott.
+you're choking me.	du håller på att kväva mig.
+tom recovered.	tom frisknade till.
+no one is waiting at the bus stop. we may have missed the bus.	ingen väntar vid busshållplatsen. vi kanske har missat bussen.
+it was very funny.	det var väldigt roligt.
+she may realize later what i meant.	kanske inser hon senare vad jag menade.
+how many galaxies are there in the universe?	hur många galaxer finns det i universum?
+the distance from my house to your house is two kilometers.	avståndet från mitt hus till ert hus är två kilometer.
+i gave tom a towel.	jag gav tom en handduk.
+this is their house.	det här är deras hus.
+no one's buying it.	ingen köper den.
+you shouldn't stay up so late at night.	du borde inte sitta uppe så sent på kvällen.
+life is at risk.	det är risk för livet.
+i am dirty-blond.	jag är askblond.
+did you understand what he meant?	förstod ni vad han menade?
+you are a good man.	du är en god man.
+the police came and investigated the crime scene.	polisen kom och undersökte brottsplatsen.
+tom didn't know what he was supposed to do.	tom visste inte vad det var meningen att han skulle göra.
+is there anything you wanna say?	finns det någonting du säga?
+tom broke the world record.	tom slog världsrekordet.
+where did tom buy it?	var köpte tom den?
+who's tom living with?	vem bor tom tillsammans med?
+it's really sad.	det är jättetråkigt.
+i trust you all.	jag litar på er alla.
+she's a head taller than me.	hon är ett huvud längre än jag.
+will do.	ska bli.
+about half of everything he says is sheer fiction.	ungefär hälften av allt han säger är rena rama påhittet.
+eat!	ät!
+they formed a band called the squirrels.	de skapade ett band kallat the squirrels.
+the news of her death came as a bolt from the blue.	nyheten om hennes död kom som en blixt från klar himmel.
+i want to be with you.	jag vill vara med dig.
+tom doesn't know many people in boston.	tom känner inte många människor i boston.
+idiot.	idiot.
+i like the colors.	jag gillar färgerna.
+tom is narrow-minded.	tom är trångsynt.
+do you like candy?	tycker du om godis?
+hello? are you still here?	hallå? är du där?
+we've got to find them first.	vi måste hitta dem först.
+tom died in december.	tom dog i december.
+shall i go on?	ska jag fortsätta?
+pour some coffee for tom.	häll upp lite kaffe åt tom.
+this is going to be interesting.	det här blir intressant.
+go back, tom.	gå tillbaka, tom.
+tom knows where we live.	tom vet var vi bor.
+how do you fix this?	hur lagar man den här?
+my hands are really cold.	mina händer är väldigt kalla.
+it's no use complaining.	det är inte lönt att klaga.
+i warned him.	jag varnade honom.
+i know tom cheated.	jag vet att tom fuskade.
+these are tom's ski boots.	det här är toms pjäxor.
+are these bananas ripe?	är de här bananerna mogna?
+he went to visit salas in algeria.	han besökte salas i algeriet.
+i noticed that she sat in the front row.	jag lade märke till att hon satt på främsta raden.
+it is similar.	det är liknande.
+i survived.	jag överlevde.
+tom is famous.	tom är berömd.
+tom opened his suitcase.	tom öppnade sin resväska.
+is it a recent picture?	är det ett nytt foto?
+i don't like this song.	jag gillar inte den här låten.
+what did i win?	vad vann jag?
+i was here all afternoon.	jag var här hela eftermiddagen.
+you're always tired.	du är alltid trött.
+ten years have passed since i came here.	tio år har gått sedan jag kom hit.
+i've always enjoyed collecting metal objects.	jag har alltid tyckt om att samla på metallföremål.
+she barely was able to get out of bed.	hon kunde knappt ta sig upp ur sängen.
+they live downstairs.	de bor på våningen under.
+is she your sister?	är hon din syster?
+they arrived before me.	de kom före mig.
+the enemy destroyed many of our ships.	fienden förstörde många av våra skepp.
+have you ever eaten japanese food?	har du någonsin ätit japansk mat?
+how far is it to boston?	hur långt är det till boston?
+write short sentences!	skriv korta meningar!
+my arm still hurts.	jag har fortfarande ont i armen.
+he soon accustomed himself to cold weather.	han vande sig snart vid det kalla vädret.
+are you depressed?	är ni deprimerade?
+have another drink.	ta ett glas till.
+look at those two lovebirds.	titta på de två turturduvorna.
+how do you spell your name?	hur stavar man ditt namn?
+he's the captain of a team.	han är lagkapten.
+go to tom's house.	gå hem till tom.
+he looks familiar.	han ser bekant ut.
+i am only a customer.	jag är bara en kund.
+sami has been fooled.	sami har blivit lurad.
+hopefully you're right.	förhoppningsvis har du rätt.
+keep this.	behåll den här.
+i expect your help.	jag förväntar mig din hjälp.
+who'd want to kill me?	vem skulle vilja döda mig?
+haven't you washed the plates yet?	har du inte diskat tallrikarna än?
+do you know when tom will get back?	vet ni när tom kommer tillbaka?
+you pay interest on money that you borrow.	man betalar ränta på pengar som man lånar.
+i'm not avoiding you.	jag undviker inte dig.
+i think you're right.	jag tror du har rätt.
+you may be correct.	du kanske har rätt.
+do you need this book?	behöver du den här boken?
+tom has been to australia only once.	tom har bara varit i australien en gång.
+did you turn off the stove?	stängde du av spisen?
+he's got two cars.	han har två bilar.
+tom didn't know how lucky he was.	tom visste inte vilken tur han hade.
+i want to be able to read japanese.	jag vill kunna läsa japanska.
+the rebels sabotaged the railroad.	rebellerna saboterade järnvägen.
+it's probably haunted.	det är troligtvis hemsökt.
+everyone stayed calm.	samtliga höll sig lugna.
+can i trust them?	kan jag lita på dem?
+tom's children are sick.	toms barn är sjuka.
+you're a cheapskate.	du är en snåljåp.
+the previous tenant took excellent care of her apartment.	den förra hyresgästen skötte lägenheten utmärkt.
+a little trip to algeria will do you good.	ٍen liten tur till algeriet kommer att göra dig gott.
+yakitori is a japanese dish.	yakitori är en japansk maträtt.
+they knew that they wouldn't win.	de visste att de inte skulle vinna.
+i would like a bottle of cough mixture.	jag skulle vilja ha en flaska hostmedicin.
+are you american?	är du amerikan?
+she should take my advice.	hon bör följa mitt råd.
+i'm looking for my father.	jag letar efter min far.
+are you on facebook?	är du på facebook?
+it's an hour's walk to the station.	det är en timmes promenad till stationen.
+what are your plans?	vad har du för planer?
+i could help you.	jag skulle kunna hjälpa dig.
+who can run fastest in your class?	vem springer snabbast i din klass?
+i didn't want to see him.	jag ville inte se honom.
+big brother is watching you.	storebror ser dig.
+she's my sister's friend.	hon är min systers vän.
+everybody knew.	alla visste.
+what did tom say?	vad sa tom?
+as far as i know, that's the only possible translation.	mig veterligen är det den enda möjliga översättningen.
+i want to run a windows 95 game.	jag vill köra ett windows 95 spel.
+you take credit cards, right?	du tar väl kreditkort?
+supplies of oil are not infinite.	oljetillgångarna är inte oändliga.
+this screw is loose.	den här skruven är lös.
+i can answer that.	jag kan svara på det.
+are you an idiot?	är du en idiot?
+there's a couple here.	det är ett par här.
+do you see it?	ser du den?
+i still miss tom.	jag saknar tom fortfarande.
+tom is a fire swallower.	tom är eldslukare.
+i only wish tom could be here.	jag önskar bara att tom vore här.
+that's not cheap.	det där är inte billigt.
+tom bought it.	tom köpte den.
+has tom been injured?	har tom blivit skadad?
+i bought a beginner's swahili book at the secondhand book shop.	jag köpte en nybörjarbok i swahili på antikvariatet.
+tom's dogs barked at me.	toms hundar skällde på mig.
+i have no weapons.	jag har inga vapen.
+they smiled at each other.	de log mot varandra.
+you'd better not drink the tap water.	du borde verkligen inte dricka kranvattnet.
+when does it begin?	när börjar det?
+he loves traveling.	han älskar att resa.
+do you like your job?	tycker du om ditt jobb?
+i want you to be here.	jag vill att du ska vara här.
+tom wouldn't give in.	tom skulle inte ge vika.
+tom told me he called the police.	tom berättade för mig att han hade ringt polisen.
+is that what happened here?	är det det som hände här?
+i know the score.	jag vet vad det rör sig om.
+have you slept?	har du sovit?
+i took it for granted that tom could speak french.	jag tog för givet att tom kunde franska.
