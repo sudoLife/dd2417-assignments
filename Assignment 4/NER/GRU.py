@@ -98,7 +98,7 @@ class GRU2(nn.Module):
 
         for t in range(time_steps):
             outputs_fw[:, t] = self.fw(x[:, t], h_fw)
-            h_fw = outputs_fw[:, t]
+            h_fw = outputs_fw[:, t].clone()
 
         if not self.bidirectional:
             return outputs_fw, h_fw
@@ -108,7 +108,7 @@ class GRU2(nn.Module):
 
         for t in reversed(range(time_steps)):
             outputs_bw[:, t] = self.bw(x[:, t], h_bw)
-            h_bw = outputs_bw[:, t]
+            h_bw = outputs_bw[:, t].clone()
 
         return torch.concat((outputs_fw, outputs_bw), dim=-1), h_fw, h_bw
 

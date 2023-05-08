@@ -8,6 +8,7 @@ import tqdm
 
 FILENAME = "glove.6B.zip"
 
+
 def download(url):
     resp = requests.get(url, stream=True)
     total = int(resp.headers.get('content-length', 0))
@@ -22,15 +23,16 @@ def download(url):
             bar.update(len(chunk))
             yield chunk
 
+
 if not os.path.exists(FILENAME):
-	bio = io.BytesIO()
+    bio = io.BytesIO()
 
-	for chunk in download("http://nlp.stanford.edu/data/glove.6B.zip"):
-	    bio.write(chunk)
+    for chunk in download("http://nlp.stanford.edu/data/glove.6B.zip"):
+        bio.write(chunk)
 
-	f = open(FILENAME, 'wb')
-	f.write(bio.getbuffer())
-	f.close()
+    f = open(FILENAME, 'wb')
+    f.write(bio.getbuffer())
+    f.close()
 
 
 with zipfile.ZipFile(FILENAME, 'r') as zip_ref:
