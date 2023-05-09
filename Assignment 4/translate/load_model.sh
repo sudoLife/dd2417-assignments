@@ -1,1 +1,1 @@
-python3 translate.py -te ../skeleton/eng-swe-test.txt -l $1
+python3 translate.py -te eng-swe-test.txt -l $1

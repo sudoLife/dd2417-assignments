@@ -9,13 +9,13 @@ import nltk
 import torch
 import numpy as np
 from pprint import pprint
+from tqdm import tqdm
 
 import torch
 import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
 from terminaltables import AsciiTable
-
 
 
 # ==================== Datasets ==================== #
@@ -31,32 +31,32 @@ target_i2w = []
 # have equal length.
 PADDING_SYMBOL = ' '
 source_w2i[PADDING_SYMBOL] = 0
-source_i2w.append( PADDING_SYMBOL )
+source_i2w.append(PADDING_SYMBOL)
 target_w2i[PADDING_SYMBOL] = 0
-target_i2w.append( PADDING_SYMBOL )
+target_i2w.append(PADDING_SYMBOL)
 
 # The special symbols to be added at the end of strings
 START_SYMBOL = '<START>'
 END_SYMBOL = '<END>'
 UNK_SYMBOL = '<UNK>'
 source_w2i[START_SYMBOL] = 1
-source_i2w.append( START_SYMBOL )
+source_i2w.append(START_SYMBOL)
 target_w2i[START_SYMBOL] = 1
-target_i2w.append( START_SYMBOL )
+target_i2w.append(START_SYMBOL)
 source_w2i[END_SYMBOL] = 2
-source_i2w.append( END_SYMBOL )
+source_i2w.append(END_SYMBOL)
 target_w2i[END_SYMBOL] = 2
-target_i2w.append( END_SYMBOL )
+target_i2w.append(END_SYMBOL)
 source_w2i[UNK_SYMBOL] = 3
-source_i2w.append( UNK_SYMBOL )
+source_i2w.append(UNK_SYMBOL)
 target_w2i[UNK_SYMBOL] = 3
-target_i2w.append( UNK_SYMBOL )
+target_i2w.append(UNK_SYMBOL)
 
 # Max number of words to be predicted if <END> symbol is not reached
 MAX_PREDICTIONS = 20
 
 
-def load_glove_embeddings(embedding_file) :
+def load_glove_embeddings(embedding_file):
     """
     Reads pre-made embeddings from a file
     """
@@ -78,22 +78,23 @@ def load_glove_embeddings(embedding_file) :
     embeddings[0] = [0]*D
     # Check if there are words that did not have a ready-made Glove embedding
     # For these words, add a random vector
-    for word in source_w2i :
+    for word in source_w2i:
         index = source_w2i[word]
-        if embeddings[index] == 0 :
+        if embeddings[index] == 0:
             embeddings[index] = (np.random.random(D)-0.5).tolist()
     return D, embeddings
 
 
-class TranslationDataset(Dataset) :
+class TranslationDataset(Dataset):
     """
     A dataset with source sentences and their respective translations
     into the target language.
 
     Each sentence is represented as a list of word IDs. 
     """
-    def __init__( self, filename, record_symbols=True ) :
-        try :
+
+    def __init__(self, filename, record_symbols=True):
+        try:
             nltk.word_tokenize("hi there.")
         except LookupError:
             nltk.download('punkt')
@@ -102,31 +103,31 @@ class TranslationDataset(Dataset) :
         # Read the datafile
         with codecs.open(filename, 'r', 'utf-8') as f:
             lines = f.read().split('\n')
-            for line in lines :
-                if '\t' not in line :
+            for line in lines:
+                if '\t' not in line:
                     continue
-                s,t = line.split('\t')
+                s, t = line.split('\t')
                 source_sentence = []
-                for w in nltk.word_tokenize(s) :
-                    if w not in source_i2w and record_symbols :
+                for w in nltk.word_tokenize(s):
+                    if w not in source_i2w and record_symbols:
                         source_w2i[w] = len(source_i2w)
-                        source_i2w.append( w )
-                    source_sentence.append( source_w2i.get(w, source_w2i[UNK_SYMBOL]) )
+                        source_i2w.append(w)
+                    source_sentence.append(source_w2i.get(w, source_w2i[UNK_SYMBOL]))
                 source_sentence.append(source_w2i[END_SYMBOL])
-                self.source_list.append( source_sentence )
+                self.source_list.append(source_sentence)
                 target_sentence = []
-                for w in nltk.word_tokenize(t) :
-                    if w not in target_i2w and record_symbols :
+                for w in nltk.word_tokenize(t):
+                    if w not in target_i2w and record_symbols:
                         target_w2i[w] = len(target_i2w)
-                        target_i2w.append( w )
-                    target_sentence.append( target_w2i.get(w, target_w2i[UNK_SYMBOL]) )
+                        target_i2w.append(w)
+                    target_sentence.append(target_w2i.get(w, target_w2i[UNK_SYMBOL]))
                 target_sentence.append(target_w2i[END_SYMBOL])
-                self.target_list.append( target_sentence )
+                self.target_list.append(target_sentence)
 
-    def __len__(self) :
+    def __len__(self):
         return len(self.source_list)
 
-    def __getitem__(self, idx) :
+    def __getitem__(self, idx):
         return self.source_list[idx], self.target_list[idx]
 
 
@@ -134,6 +135,7 @@ class PadSequence:
     """
     A callable used to merge a list of samples to form a padded mini-batch of Tensor
     """
+
     def __call__(self, batch, pad_source=source_w2i[PADDING_SYMBOL], pad_target=target_w2i[PADDING_SYMBOL]):
         source, target = zip(*batch)
         max_source_len = max(map(len, source))
@@ -142,23 +144,25 @@ class PadSequence:
         padded_target = [[l[i] if i < len(l) else pad_target for i in range(max_target_len)] for l in target]
         return padded_source, padded_target
 
-    
+
 # ==================== Encoder ==================== #
 
-class EncoderRNN(nn.Module) :
+class EncoderRNN(nn.Module):
     """
     Encodes a batch of source sentences. 
     """
-    
+
     def __init__(self, no_of_input_symbols, embeddings=None, embedding_size=16, hidden_size=25,
-        encoder_bidirectional=False, device='cpu', use_gru=False, tune_embeddings=False) :
+                 encoder_bidirectional=False, device='cpu', use_gru=False, tune_embeddings=False):
         super(EncoderRNN, self).__init__()
         self.hidden_size = hidden_size
         self.embedding_size = embedding_size
         self.is_bidirectional = encoder_bidirectional
-        self.embedding = nn.Embedding(no_of_input_symbols,embedding_size)
-        if embeddings !=  None :
-            self.embedding.weight = nn.Parameter( torch.tensor(embeddings, dtype=torch.float), requires_grad=tune_embeddings )
+        self.embedding = nn.Embedding(no_of_input_symbols, embedding_size)
+        if embeddings != None:
+            self.embedding.weight = nn.Parameter(
+                torch.tensor(embeddings, dtype=torch.float),
+                requires_grad=tune_embeddings)
         if use_gru:
             self.rnn = nn.GRU(embedding_size, hidden_size, batch_first=True, bidirectional=self.is_bidirectional)
         else:
@@ -174,23 +178,25 @@ class EncoderRNN(nn.Module) :
         x is a list of lists of size (batch_size,max_seq_length)
         Each inner list contains word IDs and represents one sentence.
         The whole list-of-lists represents a batch of sentences.
-       
+
         Returns:
         the output from the encoder RNN: a pair of two tensors, one containing all hidden states, and one 
         containing the last hidden state (see https://pytorch.org/docs/stable/generated/torch.nn.RNN.html)
         """
         # FOR (a) REPLACE THE FOLLOWING LINE WITH YOUR CODE
-        pass
+        ids_tensor = torch.LongTensor(x)
+        input_tensor = self.embedding(ids_tensor)
+        return self.rnn(input_tensor)
 
 
 # ==================== Decoder ==================== #
 
-class DecoderRNN(nn.Module) :
+class DecoderRNN(nn.Module):
 
     def __init__(self, no_of_output_symbols, embedding_size=16, hidden_size=25, use_attention=True,
-        display_attention=False, device='cpu', use_gru=False) :
+                 display_attention=False, device='cpu', use_gru=False):
         super(DecoderRNN, self).__init__()
-        self.embedding = nn.Embedding(no_of_output_symbols,embedding_size)
+        self.embedding = nn.Embedding(no_of_output_symbols, embedding_size)
         self.no_of_output_symbols = no_of_output_symbols
         self.W = nn.Parameter(torch.rand(hidden_size, hidden_size)-0.5)
         self.U = nn.Parameter(torch.rand(hidden_size, hidden_size)-0.5)
@@ -201,74 +207,74 @@ class DecoderRNN(nn.Module) :
             self.rnn = nn.GRU(embedding_size, hidden_size, batch_first=True)
         else:
             self.rnn = nn.RNN(embedding_size, hidden_size, batch_first=True)
-        self.output = nn.Linear( hidden_size, no_of_output_symbols )
+        self.output = nn.Linear(hidden_size, no_of_output_symbols)
         self.device = device
         self.to(device)
 
-    def forward(self, inp, hidden, encoder_outputs) :
+    def forward(self, inp, hidden, encoder_outputs):
         """
-        'input' is a list of length batch_size, containing the current word
-        of each sentence in the batch
+        Predicts the next word in a sequence given the current word and the previous hidden state of the decoder.
 
-        'hidden' is a tensor containing the last hidden state of the decoder, 
-        for each sequence in the batch
-        hidden.shape = (1, batch_size, hidden_size)
-
-        'encoder_outputs' is a tensor containing all hidden states from the
-        encoder (used in problem c)
-        encoder_outputs.shape = (batch_size, max_seq_length, hidden_size)
-
-        Note that 'max_seq_length' above refers to the max_seq_length
-        of the encoded sequence (not the decoded sequence).
+        Args:
+            inp (list): A list of length batch_size, containing the current word of each sentence in the batch.
+            hidden (torch.Tensor): A tensor containing the last hidden state of the decoder, for each sequence in the batch.
+                hidden.shape = (1, batch_size, hidden_size).
+            encoder_outputs (torch.Tensor): A tensor containing all hidden states from the encoder (used in problem c).
+                encoder_outputs.shape = (batch_size, max_seq_length, hidden_size).
+                Note that 'max_seq_length' above refers to the max_seq_length of the encoded sequence (not the decoded sequence).
 
         Returns:
-        If use_attention and display_attention are both True (task (c)), return a triple
-        (logits for the predicted next word, hidden state, attention weights alpha)
-
-        Otherwise (task (b)), return a pair
-        (logits for the predicted next word, hidden state).
+            If use_attention and display_attention are both True (task (c)), return a triple (logits for the predicted next word,
+            hidden state, attention weights alpha).
+            Otherwise (task (b)), return a pair (logits for the predicted next word, hidden state).
         """
+
         # FOR (b) and (c) REPLACE THE FOLLOWING LINE WITH YOUR CODE
-        pass
+        ids_tensor = torch.LongTensor(inp)
+        input_tensor = self.embedding(ids_tensor).view(len(inp), 1, -1)
+
+        output, hidden = self.rnn(input_tensor, hidden)
+
+        return self.output(output), hidden
 
 
 # ======================================== #
 
 def evaluate(ds, encoder, decoder):
-    confusion = [[0 for a in target_i2w] for b in target_i2w] 
-    correct_sentences, incorrect_sentences = 0,0
-    for x, y in ds :
+    confusion = [[0 for a in target_i2w] for b in target_i2w]
+    correct_sentences, incorrect_sentences = 0, 0
+    for x, y in ds:
         predicted_sentence = []
-        outputs, hidden = encoder( [x] )
-        if encoder.is_bidirectional :
-            hidden = hidden.permute((1,0,2)).reshape(1,-1).unsqueeze(0)
+        outputs, hidden = encoder([x])
+        if encoder.is_bidirectional:
+            hidden = hidden.permute((1, 0, 2)).reshape(1, -1).unsqueeze(0)
         predicted_symbol = target_w2i[START_SYMBOL]
-        for correct in y :
-            predictions, hidden = decoder( [predicted_symbol], hidden, outputs )
+        for correct in y:
+            predictions, hidden = decoder([predicted_symbol], hidden, outputs)
             _, predicted_tensor = predictions.topk(1)
             predicted_symbol = predicted_tensor.detach().item()
             confusion[int(predicted_symbol)][int(correct)] += 1
-            predicted_sentence.append( predicted_symbol )
-        if predicted_sentence == y :
+            predicted_sentence.append(predicted_symbol)
+        if predicted_sentence == y:
             correct_sentences += 1
-        else :
+        else:
             incorrect_sentences += 1
-    correct_symbols = sum( [confusion[i][i] for i in range(len(confusion))] )
-    all_symbols = torch.tensor(confusion).sum().item()    
+    correct_symbols = sum([confusion[i][i] for i in range(len(confusion))])
+    all_symbols = torch.tensor(confusion).sum().item()
 
     # Construct a neat confusion matrix
-    for i in range(len(confusion)) :
-        confusion[i].insert(0,target_i2w[i])
+    for i in range(len(confusion)):
+        confusion[i].insert(0, target_i2w[i])
     first_row = ["Predicted/Real"]
     first_row.extend(target_i2w)
-    confusion.insert(0,first_row)
+    confusion.insert(0, first_row)
     # t = AsciiTable( confusion )
-    
+
     #print( t.table )
-    print( "Correctly predicted words    : ", correct_symbols )
-    print( "Incorrectly predicted words  : ", all_symbols-correct_symbols )
-    print( "Correctly predicted sentences  : ", correct_sentences )
-    print( "Incorrectly predicted sentences: ", incorrect_sentences )
+    print("Correctly predicted words    : ", correct_symbols)
+    print("Incorrectly predicted words  : ", all_symbols-correct_symbols)
+    print("Correctly predicted sentences  : ", correct_sentences)
+    print("Incorrectly predicted sentences: ", incorrect_sentences)
     print()
 
 
@@ -286,11 +292,11 @@ if __name__ == '__main__':
     parser.add_argument('-hs', '--hidden_size', type=int, default=25, help='Size of hidden state')
     parser.add_argument('-bs', '--batch_size', type=int, default=100, help='Batch size')
     parser.add_argument('-e', '--epochs', type=int, default=10, help='Number of epochs')
-    parser.add_argument( '-a', '--attention', action='store_true', help='Use attention weights' )
-    parser.add_argument( '-b', '--bidirectional', action='store_true', help='The encoder is bidirectional' )
-    parser.add_argument( '-g', '--gru', action='store_true', help='Use GRUs instead of ordinary RNNs' )
-    parser.add_argument( '-s', '--save', action='store_true', help='Save model' )
-    parser.add_argument( '-l', '--load', type=str, help="The directory with encoder and decoder models to load")
+    parser.add_argument('-a', '--attention', action='store_true', help='Use attention weights')
+    parser.add_argument('-b', '--bidirectional', action='store_true', help='The encoder is bidirectional')
+    parser.add_argument('-g', '--gru', action='store_true', help='Use GRUs instead of ordinary RNNs')
+    parser.add_argument('-s', '--save', action='store_true', help='Save model')
+    parser.add_argument('-l', '--load', type=str, help="The directory with encoder and decoder models to load")
 
     args = parser.parse_args()
 
@@ -331,7 +337,7 @@ if __name__ == '__main__':
             use_gru=settings['use_gru'],
             device=device
         )
-        
+
         encoder.load_state_dict(torch.load(os.path.join(args.load, "encoder.model")))
         decoder.load_state_dict(torch.load(os.path.join(args.load, "decoder.model")))
 
@@ -354,24 +360,24 @@ if __name__ == '__main__':
         use_attention = args.attention
 
         # Read datasets
-        training_dataset = TranslationDataset( args.train )
-        dev_dataset = TranslationDataset( args.dev, record_symbols=False )
+        training_dataset = TranslationDataset(args.train)
+        dev_dataset = TranslationDataset(args.dev, record_symbols=False)
 
-        print( "Number of source words: ", len(source_i2w) )
-        print( "Number of target words: ", len(target_i2w) )
-        print( "Number of training sentences: ", len(training_dataset) )
+        print("Number of source words: ", len(source_i2w))
+        print("Number of target words: ", len(target_i2w))
+        print("Number of training sentences: ", len(training_dataset))
         print()
 
         # If we have pre-computed word embeddings, then make sure these are used
-        if args.embeddings :
-            embedding_size, embeddings = load_glove_embeddings( args.embeddings )
-        else :
+        if args.embeddings:
+            embedding_size, embeddings = load_glove_embeddings(args.embeddings)
+        else:
             embedding_size = args.hidden_size
             embeddings = None
 
         training_loader = DataLoader(training_dataset, batch_size=args.batch_size, collate_fn=PadSequence())
         dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, collate_fn=PadSequence())
-        
+
         criterion = nn.CrossEntropyLoss()
         # criterion = nn.NLLLoss()
 
@@ -399,22 +405,22 @@ if __name__ == '__main__':
 
         encoder.train()
         decoder.train()
-        print( datetime.now().strftime("%H:%M:%S"), "Starting training." )
+        print(datetime.now().strftime("%H:%M:%S"), "Starting training.")
 
-        for epoch in range( args.epochs ) :
+        for epoch in range(args.epochs):
             total_loss = 0
-            for source, target in training_loader: #tqdm(training_loader, desc="Epoch {}".format(epoch + 1)):
+            for source, target in training_loader:  # tqdm(training_loader, desc="Epoch {}".format(epoch + 1)):
                 encoder_optimizer.zero_grad()
                 decoder_optimizer.zero_grad()
                 loss = 0
                 # hidden is (D * num_layers, B, H)
-                outputs, hidden = encoder( source )
+                outputs, hidden = encoder(source)
                 if args.bidirectional:
-                    hidden = torch.cat([hidden[0,:, :], hidden[1,:,:]], dim=1).unsqueeze(0)
-                    
+                    hidden = torch.cat([hidden[0, :, :], hidden[1, :, :]], dim=1).unsqueeze(0)
+
                 # The probability of doing teacher forcing will decrease
                 # from 1 to 0 over the range of epochs.
-                teacher_forcing_ratio = 1 #- epoch/args.epochs
+                teacher_forcing_ratio = 1  # - epoch/args.epochs
 
                 # The input to the decoder in the first time step will be
                 # the boundary symbol, regardless if we are using teacher
@@ -423,14 +429,14 @@ if __name__ == '__main__':
                 predicted_symbol = [target_w2i[START_SYMBOL] for sublist in target]
 
                 target_length = len(target[0])
-                for i in range(target_length) :
+                for i in range(target_length):
                     use_teacher_forcing = (random.random() < teacher_forcing_ratio)
-                    if use_teacher_forcing :
-                        predictions, hidden = decoder( idx, hidden, outputs )
+                    if use_teacher_forcing:
+                        predictions, hidden = decoder(idx, hidden, outputs)
                     else:
                         # Here we input the previous prediction rather than the
                         # correct symbol.
-                        predictions, hidden = decoder( predicted_symbol, hidden, outputs )
+                        predictions, hidden = decoder(predicted_symbol, hidden, outputs)
                     _, predicted_tensor = predictions.topk(1)
                     predicted_symbol = predicted_tensor.squeeze().tolist()
 
@@ -438,13 +444,13 @@ if __name__ == '__main__':
                     # strings. They will also be used as inputs for the next
                     # time step if we use teacher forcing.
                     idx = [sublist[i] for sublist in target]
-                    loss += criterion( predictions.squeeze(), torch.tensor(idx).to(device) )
+                    loss += criterion(predictions.squeeze(), torch.tensor(idx).to(device))
                 loss /= (target_length * args.batch_size)
                 loss.backward()
                 encoder_optimizer.step()
                 decoder_optimizer.step()
-                total_loss += loss
-            print( datetime.now().strftime("%H:%M:%S"), "Epoch", epoch, "loss:", total_loss.detach().item() )
+                total_loss += loss.item()
+            print(datetime.now().strftime("%H:%M:%S:"), "Epoch", epoch, "loss:", total_loss)
             total_loss = 0
 
             if epoch % 10 == 0:
@@ -453,23 +459,23 @@ if __name__ == '__main__':
 
         # ==================== Save the model  ==================== #
 
-        if ( args.save ) :
-            dt = str(datetime.now()).replace(' ','_').replace(':','_').replace('.','_')
+        if (args.save):
+            dt = str(datetime.now()).replace(' ', '_').replace(':', '_').replace('.', '_')
             newdir = 'model_' + dt
-            os.mkdir( newdir )
-            torch.save( encoder.state_dict(), os.path.join(newdir, 'encoder.model') )
-            torch.save( decoder.state_dict(), os.path.join(newdir, 'decoder.model') )
-            with open( os.path.join(newdir, 'source_w2i'), 'wb' ) as f :
-                pickle.dump( source_w2i, f )
+            os.mkdir(newdir)
+            torch.save(encoder.state_dict(), os.path.join(newdir, 'encoder.model'))
+            torch.save(decoder.state_dict(), os.path.join(newdir, 'decoder.model'))
+            with open(os.path.join(newdir, 'source_w2i'), 'wb') as f:
+                pickle.dump(source_w2i, f)
                 f.close()
-            with open( os.path.join(newdir, 'source_i2w'), 'wb' ) as f :
-                pickle.dump( source_i2w, f )
+            with open(os.path.join(newdir, 'source_i2w'), 'wb') as f:
+                pickle.dump(source_i2w, f)
                 f.close()
-            with open( os.path.join(newdir, 'target_w2i'), 'wb' ) as f :
-                pickle.dump( target_w2i, f )
+            with open(os.path.join(newdir, 'target_w2i'), 'wb') as f:
+                pickle.dump(target_w2i, f)
                 f.close()
-            with open( os.path.join(newdir, 'target_i2w'), 'wb' ) as f :
-                pickle.dump( target_i2w, f )
+            with open(os.path.join(newdir, 'target_i2w'), 'wb') as f:
+                pickle.dump(target_i2w, f)
                 f.close()
 
             settings = {
@@ -485,80 +491,79 @@ if __name__ == '__main__':
                 'use_gru': args.gru,
                 'tune_embeddings': args.tune_embeddings
             }
-            with open( os.path.join(newdir, 'settings.json'), 'w' ) as f:
+            with open(os.path.join(newdir, 'settings.json'), 'w') as f:
                 json.dump(settings, f)
 
     # ==================== Evaluation ==================== #
 
     encoder.eval()
     decoder.eval()
-    print( "Evaluating on the test data..." )
+    print("Evaluating on the test data...")
 
-    test_dataset = TranslationDataset( args.test, record_symbols=False )
-    print( "Number of test sentences: ", len(test_dataset) )
+    test_dataset = TranslationDataset(args.test, record_symbols=False)
+    print("Number of test sentences: ", len(test_dataset))
     print()
 
     evaluate(test_dataset, encoder, decoder)
 
-
     # ==================== User interaction ==================== #
 
     decoder.display_attention = True
-    while( True ) :
-        text = input( "> " )
-        if text == "" :
+    while (True):
+        text = input("> ")
+        if text == "":
             continue
-        try :
+        try:
             source_sentence = [source_w2i[w] for w in nltk.word_tokenize(text)]
-        except KeyError :
-            print( "Erroneous input string" )
+        except KeyError:
+            print("Erroneous input string")
             continue
-        outputs, hidden = encoder( [source_sentence] )
-        if encoder.is_bidirectional :
-            hidden = hidden.permute((1,0,2)).reshape(1,-1).unsqueeze(0)
-        
+        outputs, hidden = encoder([source_sentence])
+        if encoder.is_bidirectional:
+            hidden = hidden.permute((1, 0, 2)).reshape(1, -1).unsqueeze(0)
+
         predicted_symbol = target_w2i[START_SYMBOL]
         target_sentence = []
         attention_probs = []
         num_attempts = 0
         while num_attempts < MAX_PREDICTIONS:
-            if use_attention :
-                predictions, hidden, alpha = decoder( [predicted_symbol], hidden, outputs )
-                attention_probs.append( alpha.permute(0,2,1).squeeze().detach().tolist() )
-            else :
-                predictions, hidden = decoder( [predicted_symbol], hidden, outputs )
-            
+            if use_attention:
+                predictions, hidden, alpha = decoder([predicted_symbol], hidden, outputs)
+                attention_probs.append(alpha.permute(0, 2, 1).squeeze().detach().tolist())
+            else:
+                predictions, hidden = decoder([predicted_symbol], hidden, outputs)
+
             _, predicted_tensor = predictions.topk(1)
             predicted_symbol = predicted_tensor.detach().item()
-            target_sentence.append( predicted_symbol )
+            target_sentence.append(predicted_symbol)
 
             num_attempts += 1
 
-            if predicted_symbol == target_w2i[END_SYMBOL] :
+            if predicted_symbol == target_w2i[END_SYMBOL]:
                 break
 
-        for i in target_sentence :
-            print( target_i2w[i].encode('utf-8').decode(), end=' ' )
+        for i in target_sentence:
+            print(target_i2w[i].encode('utf-8').decode(), end=' ')
         print()
 
-        if use_attention :
+        if use_attention:
             # Construct the attention table
             ap = torch.tensor(attention_probs).T
             if len(ap.shape) == 1:
                 ap = ap.unsqueeze(0)
             attention_probs = ap.tolist()
-            
-            for i in range(len(attention_probs)) :
-                for j in range(len(attention_probs[i])) :
+
+            for i in range(len(attention_probs)):
+                for j in range(len(attention_probs[i])):
                     attention_probs[i][j] = "{val:.2f}".format(val=attention_probs[i][j])
-            for i in range(len(attention_probs)) :
-                if i<len(text) :
-                    attention_probs[i].insert(0,source_i2w[source_sentence[i]])
-                else :
-                    attention_probs[i].insert(0,' ')
+            for i in range(len(attention_probs)):
+                if i < len(text):
+                    attention_probs[i].insert(0, source_i2w[source_sentence[i]])
+                else:
+                    attention_probs[i].insert(0, ' ')
             first_row = ["Source/Result"]
-            for w in target_sentence :
+            for w in target_sentence:
                 first_row.append(target_i2w[w])
-            attention_probs.insert(0,first_row)
-            t = AsciiTable( attention_probs )
-            print( t.table )
+            attention_probs.insert(0, first_row)
+            t = AsciiTable(attention_probs)
+            print(t.table)
